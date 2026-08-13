@@ -1,0 +1,25 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "liuyao",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-08-01",
+  "compatibility_flags": [
+    // 启用 Node.js API（OpenNext 必需）
+    "nodejs_compat",
+    // 只允许 fetch 公共 URL
+    "global_fetch_strictly_public"
+  ],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "liuyao"
+    }
+  ]
+  // 敏感环境变量不写在这里，部署后用:
+  //   wrangler secret put DEEPSEEK_API_KEY
+  //   wrangler secret put ACCESS_KEY
+}

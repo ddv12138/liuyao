@@ -1,69 +1,166 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+// 主页面：门禁 → 起卦 → 卦象/原文 → AI 解卦（流式）→ 历史
+import { useEffect, useRef, useState } from "react";
+import { cast, tossYao, type CastResult, type TossedYao } from "@/lib/divination";
+import {
+  getAccessKey,
+  setAccessKey,
+  clearAccessKey,
+  loadHistory,
+  addHistoryEntry,
+  updateHistoryAnswer,
+  deleteHistoryEntry,
+  clearHistory,
+  type HistoryEntry,
+  HISTORY_EVENT,
+} from "@/lib/storage";
+import { KeyGate } from "@/components/KeyGate";
+import { CastArea } from "@/components/CastArea";
+import { HexagramResult } from "@/components/HexagramResult";
+import { AiSection } from "@/components/AiSection";
+import { HistorySection } from "@/components/HistorySection";
+
+export default function Page() {
+  // 门禁：null=未确认，string=已存 key；booting 期间不渲染门禁避免闪烁
+  const [key, setKey] = useState<string | null>(null);
+  const [booting, setBooting] = useState(true);
+
+  const [yaos, setYaos] = useState<TossedYao[]>([]);
+  const [tossing, setTossing] = useState(false);
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const historyIdRef = useRef<string | null>(null);
+  const tossTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // 初始读取 localStorage 里的口令（异步执行，避免 effect 内同步 setState）
+  useEffect(() => {
+    const k = getAccessKey();
+    const t = setTimeout(() => {
+      setKey(k);
+      setBooting(false);
+      setHistory(loadHistory());
+    }, 0);
+    return () => clearTimeout(t);
+  }, []);
+
+  // 历史记录由 storage 变更事件驱动刷新
+  useEffect(() => {
+    const refresh = () => setHistory(loadHistory());
+    window.addEventListener(HISTORY_EVENT, refresh);
+    return () => window.removeEventListener(HISTORY_EVENT, refresh);
+  }, []);
+
+  useEffect(
+    () => () => {
+      if (tossTimer.current) clearTimeout(tossTimer.current);
+    },
+    []
+  );
+
+  // 起卦：点击 → 动画 750ms → 出爻；第六爻落下即成卦并写入历史
+  function handleToss() {
+    if (tossing || yaos.length >= 6) return;
+    setTossing(true);
+    tossTimer.current = setTimeout(() => {
+      const next = [...yaos, tossYao()];
+      setYaos(next);
+      setTossing(false);
+      if (next.length === 6) {
+        const r = cast(next);
+        if (r) {
+          historyIdRef.current = addHistoryEntry({
+            values: next.map((y) => y.value),
+            originalName: r.original.name,
+            originalImage: r.original.image,
+            changedName: r.changed?.name,
+            changedImage: r.changed?.image,
+          });
+        }
+      }
+    }, 750);
+  }
+
+  // 渲染期派生成卦结果（无 setState）
+  const result: CastResult | null = yaos.length === 6 ? cast(yaos) : null;
+
+  function reset() {
+    setYaos([]);
+    historyIdRef.current = null;
+  }
+
+  function handleFinished(answer: string, truncated: boolean, question: string) {
+    if (historyIdRef.current) {
+      updateHistoryAnswer(historyIdRef.current, answer, truncated, question);
+    }
+  }
+
+  function lockout() {
+    clearAccessKey();
+    setKey(null);
+  }
+
+  if (booting) {
+    return <div className="min-h-screen" />;
+  }
+
+  if (!key) {
+    return (
+      <KeyGate
+        onUnlock={(k) => {
+          setAccessKey(k);
+          setKey(k);
+        }}
+      />
+    );
+  }
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <main className="mx-auto max-w-2xl space-y-5 px-4 py-6 pb-16">
+      <header className="flex items-center justify-between">
+        <div>
+          <h1 className="font-serif-cn text-2xl font-bold text-[var(--ink)]">六爻占卦</h1>
+          <p className="text-xs text-[var(--ink-soft)]">铜钱起卦 · 卦辞爻辞 · AI 解卦</p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+        <button
+          onClick={lockout}
+          className="rounded-md border border-[var(--line)] px-2.5 py-1 text-xs text-[var(--ink-soft)] transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
+          title="清除口令并退出"
+        >
+          退出
+        </button>
+      </header>
+
+      <CastArea yaos={yaos} tossing={tossing} onToss={handleToss} onRestart={reset} />
+
+      {result && (
+        <>
+          <HexagramResult result={result} />
+          <AiSection
+            values={result.yaos.map((y) => y.value)}
+            apiKey={key}
+            onFinished={handleFinished}
+            onUnauthorized={lockout}
+          />
+          <div className="flex justify-center">
+            <button
+              onClick={reset}
+              className="rounded-lg border border-[var(--line)] px-6 py-2.5 text-sm text-[var(--ink-soft)] transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
+            >
+              再占一次
+            </button>
+          </div>
+        </>
+      )}
+
+      <HistorySection
+        entries={history}
+        onDelete={(id) => {
+          deleteHistoryEntry(id);
+        }}
+        onClear={() => {
+          clearHistory();
+        }}
+      />
+    </main>
   );
 }

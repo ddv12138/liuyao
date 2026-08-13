@@ -1,0 +1,49 @@
+# 推送 main 分支时自动构建并部署到 Cloudflare Workers
+# 不做 Docker 镜像构建。首次使用需在 GitHub 仓库 Settings → Secrets and variables → Actions 配置:
+#   CLOUDFLARE_API_TOKEN  —— 在 Cloudflare 控制台创建（Workers Scripts: Edit 权限）
+#   CLOUDFLARE_ACCOUNT_ID —— 账号 ID（wrangler whoami 可查，本账号: 1fe9771e2d2204fde569c51fa6b612aa）
+#   DEEPSEEK_API_KEY     —— DeepSeek API 密钥（注入 Worker secret）
+#   ACCESS_KEY           —— 页面访问口令（注入 Worker secret，当前值: liukang）
+name: deploy-cf
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    concurrency:
+      group: deploy-cf
+      cancel-in-progress: true
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      WRANGLER_SEND_METRICS: "false"
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装 Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: 安装依赖
+        run: npm ci --no-audit --no-fund
+
+      - name: OpenNext 构建 + 部署到 Workers
+        run: npx opennextjs-cloudflare build && npx wrangler deploy
+
+      - name: 注入 DEEPSEEK_API_KEY secret
+        run: printf '%s' "${{ secrets.DEEPSEEK_API_KEY }}" | npx wrangler secret put DEEPSEEK_API_KEY
+
+      - name: 注入 ACCESS_KEY secret
+        run: printf '%s' "${{ secrets.ACCESS_KEY }}" | npx wrangler secret put ACCESS_KEY
+
+      - name: 输出线上地址
+        run: echo "已部署 https://liuyao.644077730.workers.dev"
