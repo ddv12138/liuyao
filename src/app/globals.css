@@ -136,6 +136,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
   min-height: 0.5rem;
 }
 
@@ -150,15 +151,18 @@ body {
 }
 
 .hexagram-with-labels .yao-label {
+  position: absolute;
+  right: calc(100% + 0.75rem);
   width: 10.5rem;
   min-width: 10.5rem;
-  margin-right: 0.75rem;
+  margin-right: 0;
 }
 
 .hexagram-compact.hexagram-with-labels .yao-label {
+  right: calc(100% + 0.45rem);
   width: 5.25rem;
   min-width: 5.25rem;
-  margin-right: 0.45rem;
+  margin-right: 0;
   font-size: 0.62rem;
 }
 
@@ -180,7 +184,7 @@ body {
   .hexagram-normal.hexagram-with-labels .yao-label {
     width: 9.25rem;
     min-width: 9.25rem;
-    margin-right: 0.5rem;
+    margin-right: 0;
     font-size: 0.62rem;
   }
 }
