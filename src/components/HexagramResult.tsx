@@ -2,7 +2,7 @@
 
 // 卦象与原文展示：本卦（卦辞 + 动爻爻辞/静卦提示）+ 变卦（卦辞 + 变爻爻辞）
 // 此阶段不涉及大模型
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   formatYaoPosition,
   getInterpretationGuide,
@@ -23,6 +23,16 @@ export function HexagramResult({
   const { original, changed, moving, yaos } = result;
   const guide = getInterpretationGuide(result);
   const [showAllLines, setShowAllLines] = useState(false);
+  const [openInfoId, setOpenInfoId] = useState<string | null>(null);
+  useEffect(() => {
+    const closeOnOutsidePointer = (event: PointerEvent) => {
+      const target = event.target;
+      if (target instanceof Element && target.closest("[data-yao-info-surface]")) return;
+      setOpenInfoId(null);
+    };
+    document.addEventListener("pointerdown", closeOnOutsidePointer);
+    return () => document.removeEventListener("pointerdown", closeOnOutsidePointer);
+  }, []);
   const isStatic = moving.length === 0;
   const originalAnnotations = getYaoAnnotations(result, "original");
   const changedAnnotations = changed ? getYaoAnnotations(result, "changed") : [];
@@ -34,6 +44,7 @@ export function HexagramResult({
       moving: yao.moving,
       label: getAnnotationLabel(index, name, annotation, showAllLines),
       labelTone: annotation?.tone ?? "neutral",
+      info: getYaoInfo("本卦", name, annotation, original.lines[index]?.text ?? ""),
     };
   });
   const changedLines: LineSpec[] = changed
@@ -44,9 +55,13 @@ export function HexagramResult({
           yang: bit === 1,
           label: getAnnotationLabel(index, name, annotation, showAllLines),
           labelTone: annotation?.tone ?? "neutral",
+          info: getYaoInfo("变卦", name, annotation, changed.lines[index]?.text ?? ""),
         };
       })
     : [];
+  const toggleInfo = (id: string) => {
+    setOpenInfoId((current) => (current === id ? null : id));
+  };
 
   return (
     <section className="fade-in-up grid gap-4 md:grid-cols-2">
@@ -62,7 +77,10 @@ export function HexagramResult({
           <button
             type="button"
             aria-pressed={showAllLines}
-            onClick={() => setShowAllLines((current) => !current)}
+            onClick={() => {
+              setShowAllLines((current) => !current);
+              setOpenInfoId(null);
+            }}
             className="rounded-md border border-[var(--line)] bg-[var(--paper)] px-2.5 py-1 text-xs text-[var(--ink-soft)] transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
           >
             {showAllLines ? "收起爻位" : "显示全部爻位"}
@@ -75,7 +93,11 @@ export function HexagramResult({
           <HexagramFigure
             lines={originalLines}
             size="normal"
-            showLabels={showAllLines || moving.length > 0}
+            showLabels={showAllLines}
+            showInfo={!showAllLines}
+            infoIdPrefix="original"
+            openInfoId={openInfoId}
+            onInfoToggle={toggleInfo}
           />
         </div>
         <span className="absolute left-5 top-5 rounded-md bg-[var(--accent)] px-2 py-0.5 text-xs font-medium text-white">
@@ -133,7 +155,11 @@ export function HexagramResult({
               lines={changedLines}
               size="normal"
               showMarkers={false}
-              showLabels={showAllLines || moving.length > 0}
+              showLabels={showAllLines}
+              showInfo={!showAllLines}
+              infoIdPrefix="changed"
+              openInfoId={openInfoId}
+              onInfoToggle={toggleInfo}
             />
           </div>
           <span className="absolute left-5 top-5 rounded-md bg-[var(--gold)] px-2 py-0.5 text-xs font-medium text-white">
@@ -194,6 +220,18 @@ function getAnnotationLabel(
   return `${formatYaoPosition(index, name)} · ${suffix}`;
 }
 
+function getYaoInfo(
+  section: string,
+  name: string,
+  annotation: YaoAnnotation | null | undefined,
+  text: string,
+): LineSpec["info"] {
+  if (!annotation) return undefined;
+  const relation = annotation.text.startsWith(name)
+    ? annotation.text.slice(name.length).replace(/^ · /, "")
+    : annotation.text;
+  return { title: `${section} · ${name}`, relation, text };
+}
 function LineItem({
   name,
   text,

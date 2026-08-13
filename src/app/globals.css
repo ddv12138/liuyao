@@ -152,14 +152,76 @@ body {
 
 .hexagram-with-labels .yao-label {
   position: absolute;
-  right: calc(100% + 0.75rem);
+  left: calc(100% + 0.75rem);
   width: 10.5rem;
   min-width: 10.5rem;
   margin-right: 0;
+  text-align: left;
+}
+.hexagram-with-info .yao-info-trigger {
+  position: absolute;
+  left: calc(100% + 0.35rem);
+  top: 50%;
+  z-index: 2;
+  width: 1.25rem;
+  height: 1.25rem;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  color: var(--accent);
+  background: transparent;
+  font-size: 0.9rem;
+  line-height: 1;
+  transform: translateY(-50%);
+  cursor: pointer;
 }
 
+.hexagram-with-info .yao-info-trigger:hover,
+.hexagram-with-info .yao-info-trigger[aria-expanded="true"] {
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+.yao-info-popover {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.4rem);
+  z-index: 10;
+  width: min(17rem, calc(100vw - 3rem));
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: 0.7rem;
+  background: var(--paper);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 12%);
+  color: var(--ink);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  text-align: left;
+}
+
+.yao-info-popover strong,
+.yao-info-popover span {
+  display: block;
+}
+
+.yao-info-popover strong {
+  color: var(--accent);
+  font-family: var(--font-serif), "Songti SC", serif;
+  font-size: 0.9rem;
+}
+
+.yao-info-popover span {
+  color: var(--gold);
+  font-weight: 600;
+}
+
+.yao-info-popover p {
+  margin: 0.25rem 0 0;
+  font-family: var(--font-serif), "Songti SC", serif;
+}
+
+
 .hexagram-compact.hexagram-with-labels .yao-label {
-  right: calc(100% + 0.45rem);
+  left: calc(100% + 0.45rem);
   width: 5.25rem;
   min-width: 5.25rem;
   margin-right: 0;
