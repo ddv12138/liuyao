@@ -94,6 +94,7 @@ export type InterpretationGuide = {
   primary: string[];
   secondary: string[];
   changedStatic: number[];
+  special?: "用九" | "用六";
 };
 
 /**
@@ -181,7 +182,98 @@ export function getInterpretationGuide(result: CastResult): InterpretationGuide 
     primary: [specialLine ? `本卦${specialLine}爻辞` : "变卦卦辞"],
     secondary: [specialLine ? "变卦卦辞（辅助趋势）" : "本卦卦辞（背景）"],
     changedStatic,
+    special: specialLine ?? undefined,
   };
+}
+export const YAO_POSITION_NAMES = ["初爻", "二爻", "三爻", "四爻", "五爻", "上爻"] as const;
+
+export function yaoPositionName(index: number): string {
+  return YAO_POSITION_NAMES[index] ?? `第${index + 1}爻`;
+}
+
+export type YaoAnnotationTone = "primary" | "secondary" | "changed";
+
+export interface YaoAnnotation {
+  text: string;
+  tone: YaoAnnotationTone;
+}
+
+/** 生成本卦/变卦六爻图旁的主次与变化位置标记。 */
+export function getYaoAnnotations(
+  result: CastResult,
+  view: "original" | "changed",
+): Array<YaoAnnotation | null> {
+  const annotations: Array<YaoAnnotation | null> = Array(6).fill(null);
+  const { original, changed, moving } = result;
+  const count = moving.length;
+  const guide = getInterpretationGuide(result);
+  const source = view === "original" ? original : changed;
+
+  if (!source || count === 0) return annotations;
+
+  const lineName = (index: number) => source.lines[index]?.name ?? `第${index + 1}爻`;
+  const set = (index: number, text: string, tone: YaoAnnotationTone) => {
+    if (index >= 0 && index < annotations.length) annotations[index] = { text, tone };
+  };
+
+  if (view === "original") {
+    if (count === 1) {
+      const index = moving[0];
+      set(index, `${lineName(index)} · 动爻 · 主断`, "primary");
+    } else if (count === 2) {
+      const [lower, upper] = [...moving].sort((a, b) => a - b);
+      set(upper, `${lineName(upper)} · 上动爻 · 主断`, "primary");
+      set(lower, `${lineName(lower)} · 下动爻 · 辅断`, "secondary");
+    } else if (count === 3) {
+      for (const index of moving) {
+        set(index, `${lineName(index)} · 动爻 · 共同主断`, "primary");
+      }
+    } else {
+      for (const index of moving) {
+        set(index, `${lineName(index)} · 动爻`, "changed");
+      }
+    }
+    return annotations;
+  }
+
+  const sortedMoving = [...moving].sort((a, b) => a - b);
+  const upperMoving = sortedMoving.at(-1);
+  for (const index of moving) {
+    const isUpperMoving = index === upperMoving;
+    const suffix =
+      count === 2
+        ? isUpperMoving
+          ? "上动爻对应"
+          : "下动爻对应"
+        : count === 3
+          ? "共同主断对应"
+          : "动爻对应";
+    const tone: YaoAnnotationTone =
+      count === 1 || count === 3
+        ? "primary"
+        : count === 2
+          ? isUpperMoving
+            ? "primary"
+            : "secondary"
+          : "changed";
+    set(index, `${lineName(index)} · 变化位置 · ${suffix}`, tone);
+  }
+
+  if (count === 4) {
+    const [lower, upper] = [...guide.changedStatic].sort((a, b) => a - b);
+    set(lower, `${lineName(lower)} · 下静爻 · 主断`, "primary");
+    set(upper, `${lineName(upper)} · 上静爻 · 辅断`, "secondary");
+  } else if (count === 5) {
+    const index = guide.changedStatic[0];
+    set(index, `${lineName(index)} · 唯一静爻 · 主断`, "primary");
+  }
+
+  return annotations;
+}
+
+/** 爻位名与爻名组合，用于展开后的完整六爻标记。 */
+export function formatYaoPosition(index: number, name: string): string {
+  return `${yaoPositionName(index)} · ${name}`;
 }
 
 /** 爻位名 → 完整爻辞字符串（如 "初九 · 潜龙勿用。"） */

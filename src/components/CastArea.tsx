@@ -1,7 +1,7 @@
 "use client";
 
 // 起卦区：掷三枚铜钱得一爻，自下而上逐爻绘制；无重抛，可放弃重起
-import type { TossedYao } from "@/lib/divination";
+import { cast, formatYaoPosition, type TossedYao } from "@/lib/divination";
 import { HexagramFigure } from "@/components/HexagramFigure";
 
 const POS_NAMES = ["初爻", "二爻", "三爻", "四爻", "五爻", "上爻"];
@@ -20,8 +20,15 @@ export function CastArea({
   const done = yaos.length === 6;
   const nextIndex = yaos.length;
   const lastYao = yaos[nextIndex - 1];
+  const completedCast = done ? cast(yaos) : null;
   const figureLines = [
-    ...yaos.map((y) => ({ yang: y.yang, moving: y.moving })),
+    ...yaos.map((y, index) => ({
+      yang: y.yang,
+      moving: y.moving,
+      label: completedCast
+        ? formatYaoPosition(index, completedCast.original.lines[index]?.name ?? y.label)
+        : undefined,
+    })),
     ...Array(Math.max(0, 6 - yaos.length)).fill(null),
   ];
 
@@ -45,7 +52,7 @@ export function CastArea({
         className="mb-5 flex justify-center"
         aria-label={`已掷 ${yaos.length} 爻`}
       >
-        <HexagramFigure lines={figureLines} size="compact" />
+        <HexagramFigure lines={figureLines} size="compact" showLabels={done} />
       </div>
 
       {!done ? (

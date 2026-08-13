@@ -139,6 +139,53 @@ body {
   min-height: 0.5rem;
 }
 
+.yao-label {
+  flex: none;
+  overflow: hidden;
+  color: var(--ink-soft);
+  font-size: 0.68rem;
+  line-height: 1.1;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.hexagram-with-labels .yao-label {
+  width: 10.5rem;
+  min-width: 10.5rem;
+  margin-right: 0.75rem;
+}
+
+.hexagram-compact.hexagram-with-labels .yao-label {
+  width: 5.25rem;
+  min-width: 5.25rem;
+  margin-right: 0.45rem;
+  font-size: 0.62rem;
+}
+
+.hexagram-with-labels .yao-label-primary {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.hexagram-with-labels .yao-label-secondary {
+  color: var(--gold);
+  font-weight: 600;
+}
+
+.hexagram-with-labels .yao-label-changed {
+  color: var(--ink-soft);
+}
+
+@media (max-width: 420px) {
+  .hexagram-normal.hexagram-with-labels .yao-label {
+    width: 9.25rem;
+    min-width: 9.25rem;
+    margin-right: 0.5rem;
+    font-size: 0.62rem;
+  }
+}
+
+
 .yao-track {
   display: flex;
   align-items: center;

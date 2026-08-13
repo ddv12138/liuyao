@@ -2,10 +2,16 @@
 
 // 卦象与原文展示：本卦（卦辞 + 动爻爻辞/静卦提示）+ 变卦（卦辞 + 变爻爻辞）
 // 此阶段不涉及大模型
-import type { CastResult } from "@/lib/divination";
-import { getInterpretationGuide } from "@/lib/divination";
+import { useState } from "react";
+import {
+  formatYaoPosition,
+  getInterpretationGuide,
+  getYaoAnnotations,
+  type CastResult,
+  type YaoAnnotation,
+} from "@/lib/divination";
 import { AnnotatedText } from "@/components/AnnotatedText";
-import { HexagramFigure } from "@/components/HexagramFigure";
+import { HexagramFigure, type LineSpec } from "@/components/HexagramFigure";
 
 export function HexagramResult({
   result,
@@ -16,18 +22,60 @@ export function HexagramResult({
 }) {
   const { original, changed, moving, yaos } = result;
   const guide = getInterpretationGuide(result);
+  const [showAllLines, setShowAllLines] = useState(false);
   const isStatic = moving.length === 0;
+  const originalAnnotations = getYaoAnnotations(result, "original");
+  const changedAnnotations = changed ? getYaoAnnotations(result, "changed") : [];
+  const originalLines: LineSpec[] = yaos.map((yao, index) => {
+    const name = original.lines[index]?.name ?? `第${index + 1}爻`;
+    const annotation = originalAnnotations[index];
+    return {
+      yang: yao.yang,
+      moving: yao.moving,
+      label: getAnnotationLabel(index, name, annotation, showAllLines),
+      labelTone: annotation?.tone ?? "neutral",
+    };
+  });
+  const changedLines: LineSpec[] = changed
+    ? changed.bits.map((bit, index) => {
+        const name = changed.lines[index]?.name ?? `第${index + 1}爻`;
+        const annotation = changedAnnotations[index];
+        return {
+          yang: bit === 1,
+          label: getAnnotationLabel(index, name, annotation, showAllLines),
+          labelTone: annotation?.tone ?? "neutral",
+        };
+      })
+    : [];
+
   return (
     <section className="fade-in-up grid gap-4 md:grid-cols-2">
       <div className="md:col-span-2 rounded-xl border border-[var(--gold)]/30 bg-[var(--gold)]/5 px-4 py-3 text-sm text-[var(--ink-soft)]">
-        <span className="mr-2 font-medium text-[var(--gold)]">传统取辞</span>
-        {guide.rule}
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+          <span className="font-medium text-[var(--gold)]">传统取辞</span>
+          <span className="flex-1">{guide.rule}</span>
+          {guide.special && (
+            <span className="rounded-md bg-[var(--accent)]/10 px-2 py-0.5 font-medium text-[var(--accent)]">
+              {guide.special} · 主断
+            </span>
+          )}
+          <button
+            type="button"
+            aria-pressed={showAllLines}
+            onClick={() => setShowAllLines((current) => !current)}
+            className="rounded-md border border-[var(--line)] bg-[var(--paper)] px-2.5 py-1 text-xs text-[var(--ink-soft)] transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
+          >
+            {showAllLines ? "收起爻位" : "显示全部爻位"}
+          </button>
+        </div>
       </div>
+
       <div className="relative rounded-2xl border border-[var(--line)] bg-[var(--paper)] p-5 shadow-sm">
         <div className="mb-3 flex justify-center">
           <HexagramFigure
-            lines={yaos.map((y) => ({ yang: y.yang, moving: y.moving }))}
+            lines={originalLines}
             size="normal"
+            showLabels={showAllLines || moving.length > 0}
           />
         </div>
         <span className="absolute left-5 top-5 rounded-md bg-[var(--accent)] px-2 py-0.5 text-xs font-medium text-white">
@@ -82,9 +130,10 @@ export function HexagramResult({
         <div className="relative fade-in-up rounded-2xl border border-[var(--line)] bg-[var(--paper)] p-5 shadow-sm">
           <div className="mb-3 flex justify-center">
             <HexagramFigure
-              lines={changed.bits.map((b) => ({ yang: b === 1 }))}
+              lines={changedLines}
               size="normal"
               showMarkers={false}
+              showLabels={showAllLines || moving.length > 0}
             />
           </div>
           <span className="absolute left-5 top-5 rounded-md bg-[var(--gold)] px-2 py-0.5 text-xs font-medium text-white">
@@ -129,6 +178,20 @@ export function HexagramResult({
       )}
     </section>
   );
+}
+
+function getAnnotationLabel(
+  index: number,
+  name: string,
+  annotation: YaoAnnotation | null | undefined,
+  showAllLines: boolean,
+): string | undefined {
+  if (!annotation) return showAllLines ? formatYaoPosition(index, name) : undefined;
+  if (!showAllLines) return annotation.text;
+  const suffix = annotation.text.startsWith(name)
+    ? annotation.text.slice(name.length).replace(/^ · /, "")
+    : annotation.text;
+  return `${formatYaoPosition(index, name)} · ${suffix}`;
 }
 
 function LineItem({

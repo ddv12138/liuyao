@@ -4,6 +4,8 @@
 export interface LineSpec {
   yang: boolean;
   moving?: boolean;
+  label?: string;
+  labelTone?: "primary" | "secondary" | "changed" | "neutral";
 }
 
 export function HexagramFigure({
@@ -11,22 +13,32 @@ export function HexagramFigure({
   className = "",
   size = "normal",
   showMarkers = true,
+  showLabels = false,
 }: {
   lines: (LineSpec | null)[];
   className?: string;
   size?: "compact" | "normal";
   showMarkers?: boolean;
+  showLabels?: boolean;
 }) {
   // 从最上爻画到最下爻（lines[0] = 初爻在底部）。
   const rows = [...lines].reverse();
   return (
     <div
-      className={`hexagram-figure ${size === "compact" ? "hexagram-compact" : "hexagram-normal"} ${className}`}
+      className={`hexagram-figure ${size === "compact" ? "hexagram-compact" : "hexagram-normal"} ${showLabels ? "hexagram-with-labels" : ""} ${className}`}
     >
       {rows.map((spec, i) => {
         const idx = rows.length - 1 - i;
         return (
           <div key={i} className="yao-line yao-appear">
+            {showLabels && (
+              <span
+                className={`yao-label yao-label-${spec?.labelTone ?? "neutral"}`}
+                aria-hidden={!spec?.label}
+              >
+                {spec?.label ?? "\u00a0"}
+              </span>
+            )}
             <div className="yao-track">
               {spec ? (
                 spec.yang ? (
@@ -52,6 +64,7 @@ export function HexagramFigure({
               <span className="sr-only">
                 {spec.yang ? "阳爻" : "阴爻"}
                 {spec.moving ? "动" : ""} 第{idx + 1}爻
+                {spec.label ? `，${spec.label}` : ""}
               </span>
             )}
           </div>
