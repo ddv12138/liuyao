@@ -1,6 +1,6 @@
 "use client";
 
-// 主页面：门禁 → 起卦 → 卦象/原文 → AI 解卦（流式）→ 历史
+// 主页面：门禁 → 起卦 → 卦象/原文 → 解卦（流式）→ 历史
 import { useEffect, useRef, useState } from "react";
 import {
   cast,
@@ -133,7 +133,7 @@ export default function Page() {
             六爻占卦
           </h1>
           <p className="text-xs text-[var(--ink-soft)]">
-            铜钱起卦 · 卦辞爻辞 · AI 解卦
+            铜钱起卦 · 卦辞爻辞 · 解卦
           </p>
         </div>
         <div className="flex items-center gap-2">

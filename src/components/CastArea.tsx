@@ -47,7 +47,9 @@ export function CastArea({
           </button>
         )}
       </div>
-
+      <p className="mb-4 rounded-lg bg-[var(--bg)]/60 px-3 py-2 text-center text-sm text-[var(--ink-soft)]">
+        起卦前，请先在心中想清所问之事，掷爻时保持专注。
+      </p>
       <div
         className="mb-5 flex justify-center"
         aria-label={`已掷 ${yaos.length} 爻`}

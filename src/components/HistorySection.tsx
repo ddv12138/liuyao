@@ -136,7 +136,7 @@ export function HistorySection({
                     </>
                   ) : (
                     <p className="text-sm text-[var(--ink-soft)]">
-                      本次只起卦，未进行 AI 解卦。
+                      本次只起卦，未进行解卦。
                     </p>
                   )}
                   <div className="mt-3 text-right">

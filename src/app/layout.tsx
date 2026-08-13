@@ -9,7 +9,7 @@ const geistSans = Geist({
 
 export const metadata: Metadata = {
   title: "六爻占卦",
-  description: "掷铜钱起卦，查卦辞爻辞原文，AI 解卦",
+  description: "掷铜钱起卦，查卦辞爻辞原文，解卦",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

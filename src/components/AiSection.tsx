@@ -1,6 +1,6 @@
 "use client";
 
-// AI 解卦区：解卦按钮 → 问题弹窗 → 连接/读取/流式渲染 → 停止/重试
+// 解卦区：解卦按钮 → 问题弹窗 → 连接/读取/流式渲染 → 停止/重试
 import { useCallback, useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -123,13 +123,13 @@ export function AiSection({
       {status === "idle" && (
         <div className="text-center">
           <p className="mb-3 text-sm text-[var(--ink-soft)]">
-            卦象已明。可让 AI 结合卦辞爻辞为你解卦，也可附上你的问题。
+            卦象已明。可结合卦辞爻辞为你解卦，也可附上你的问题。
           </p>
           <button
             onClick={() => setStatus("dialog")}
             className="rounded-xl bg-[var(--accent)] px-8 py-3 text-lg font-medium text-white shadow-sm transition hover:bg-[var(--accent-dark)]"
           >
-            ✦ AI 解卦
+            ✦ 解卦
           </button>
         </div>
       )}
@@ -167,7 +167,7 @@ export function AiSection({
         <div className="fade-in-up">
           <div className="mb-2 flex items-center justify-between gap-3">
             <h3 className="font-serif-cn text-base font-bold text-[var(--ink)]">
-              AI 解卦
+              解卦
             </h3>
             {question && (
               <span className="max-w-[60%] truncate rounded-md bg-[var(--bg)] px-2 py-0.5 text-xs text-[var(--ink-soft)]">
