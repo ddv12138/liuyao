@@ -5,6 +5,8 @@ export interface StreamHandlers {
   onContent: (chunk: string) => void;
   onDone: () => void;
   onError: (message: string) => void;
+  /** 成功建立响应流、但还未收到模型内容时回调 */
+  onConnected?: () => void;
   /** 非 2xx 响应时回调（如 401 口令失效） */
   onStatus?: (status: number) => void;
 }
@@ -42,7 +44,7 @@ export async function postSSE(
     handlers.onError("响应无内容流");
     return;
   }
-
+  handlers.onConnected?.();
   const reader = res.body.getReader();
   const decoder = new TextDecoder();
   let buffer = "";

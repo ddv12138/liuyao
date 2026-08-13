@@ -269,13 +269,17 @@ const CLASSICAL_PINYIN: Record<string, string> = {
   解: "xiè",
 };
 
+// 这些字在当前中文界面中属于常见术语，不因未列入旧版 2500 字表而注音。
+// 古籍特殊读音仍由 CLASSICAL_PINYIN 在前面优先返回。
+const COMMON_UI_CHARS = new Set("卦亨爻吉凶悔吝咎利贞元");
+
 export function getPinyin(
   char: string,
   mode: AnnotationMode = "modern",
 ): string | undefined {
   if (mode === "classical" && CLASSICAL_PINYIN[char])
     return CLASSICAL_PINYIN[char];
-  if (COMMON_2500.has(char)) return undefined;
+  if (COMMON_2500.has(char) || COMMON_UI_CHARS.has(char)) return undefined;
   return RARE_PINYIN[char];
 }
 

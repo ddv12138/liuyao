@@ -32,6 +32,7 @@ function textChildren(value: string, mode: AnnotationMode): HastNode[] {
 function transformNode(
   node: HastNode,
   mode: AnnotationMode,
+  quoteMode: AnnotationMode | undefined,
   parentTag?: string,
 ): void {
   if (
@@ -43,12 +44,13 @@ function transformNode(
   )
     return;
 
+  const activeMode = node.tagName === "blockquote" && quoteMode ? quoteMode : mode;
   const nextChildren: HastNode[] = [];
   for (const child of node.children) {
     if (child.type === "text" && child.value) {
-      nextChildren.push(...textChildren(child.value, mode));
+      nextChildren.push(...textChildren(child.value, activeMode));
     } else {
-      transformNode(child, mode, child.tagName ?? parentTag);
+      transformNode(child, activeMode, quoteMode, child.tagName ?? parentTag);
       nextChildren.push(child);
     }
   }
@@ -57,10 +59,14 @@ function transformNode(
 
 /** react-markdown 的 rehype 插件：只给可读文本节点中的表外字包 ruby。 */
 export function rehypeAnnotate(
-  options: { enabled?: boolean; mode?: AnnotationMode } = {},
+  options: {
+    enabled?: boolean;
+    mode?: AnnotationMode;
+    quoteMode?: AnnotationMode;
+  } = {},
 ) {
   return (tree: HastNode) => {
     if (options.enabled === false) return;
-    transformNode(tree, options.mode ?? "modern");
+    transformNode(tree, options.mode ?? "modern", options.quoteMode);
   };
 }

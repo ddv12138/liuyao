@@ -117,8 +117,12 @@ export function HistorySection({
                           rehypePlugins={[
                             [
                               rehypeAnnotate,
-                              { enabled: showPinyin, mode: "modern" },
-                            ],
+                              {
+                                enabled: showPinyin,
+                                mode: "modern",
+                                quoteMode: "classical",
+                              },
+                            ]
                           ]}
                         >
                           {e.answer}

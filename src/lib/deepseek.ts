@@ -85,7 +85,7 @@ export async function* streamChat(
       messages,
       stream: true,
       temperature: opts.temperature ?? 0.8,
-      max_tokens: opts.maxTokens ?? 2000,
+      max_tokens: opts.maxTokens ?? 1400,
     }),
     signal: opts.signal,
   });

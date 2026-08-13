@@ -1,13 +1,29 @@
 "use client";
 
-// AI 解卦区：解卦按钮 → 问题弹窗（可选）→ SSE 流式渲染 → 停止/重试
+// AI 解卦区：解卦按钮 → 问题弹窗 → 连接/读取/流式渲染 → 停止/重试
 import { useCallback, useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { postSSE } from "@/lib/sse";
 import { rehypeAnnotate } from "@/lib/rehype-annotate";
 
-export type AiStatus = "idle" | "dialog" | "streaming" | "done" | "error";
+export type AiStatus =
+  | "idle"
+  | "dialog"
+  | "connecting"
+  | "reading"
+  | "streaming"
+  | "done"
+  | "stopped"
+  | "error";
+
+const STATUS_LABELS: Partial<Record<AiStatus, string>> = {
+  connecting: "正在连接解卦服务…",
+  reading: "已连接，正在读取解卦结果…",
+  streaming: "正在输出解读…",
+  done: "解读完成",
+  stopped: "已停止输出",
+};
 
 export function AiSection({
   values,
@@ -37,12 +53,18 @@ export function AiSection({
       setQuestion(q);
       setAnswer("");
       setErrorMsg(null);
-      setStatus("streaming");
+      setStatus("connecting");
       const abort = new AbortController();
       abortRef.current = abort;
 
       postSSE("/api/interpret", { values, question: q }, apiKey, abort.signal, {
-        onContent: (chunk) => setAnswer((prev) => prev + chunk),
+        onConnected: () => {
+          setStatus((current) => (current === "connecting" ? "reading" : current));
+        },
+        onContent: (chunk) => {
+          setStatus("streaming");
+          setAnswer((prev) => prev + chunk);
+        },
         onDone: () => {
           if (finishedRef.current) return;
           finishedRef.current = true;
@@ -69,7 +91,7 @@ export function AiSection({
         if (finishedRef.current) return;
         finishedRef.current = true;
         if ((err as Error)?.name === "AbortError") {
-          setStatus("done");
+          setStatus("stopped");
           setAnswer((prev) => {
             onFinished(prev, true, q);
             return prev;
@@ -90,6 +112,11 @@ export function AiSection({
   const stop = useCallback(() => {
     abortRef.current?.abort();
   }, []);
+
+  const isActive =
+    status === "connecting" ||
+    status === "reading" ||
+    status === "streaming";
 
   return (
     <section className="rounded-2xl border border-[var(--line)] bg-[var(--paper)] p-5 shadow-sm">
@@ -136,9 +163,9 @@ export function AiSection({
         </div>
       )}
 
-      {(status === "streaming" || status === "done" || status === "error") && (
+      {(isActive || status === "done" || status === "stopped" || status === "error") && (
         <div className="fade-in-up">
-          <div className="mb-2 flex items-center justify-between">
+          <div className="mb-2 flex items-center justify-between gap-3">
             <h3 className="font-serif-cn text-base font-bold text-[var(--ink)]">
               AI 解卦
             </h3>
@@ -149,12 +176,25 @@ export function AiSection({
             )}
           </div>
 
+          {STATUS_LABELS[status] && (
+            <p
+              className="mb-3 text-sm text-[var(--ink-soft)]"
+              aria-live="polite"
+            >
+              {STATUS_LABELS[status]}
+            </p>
+          )}
+
           {answer ? (
             <div className="prose-yi rounded-xl bg-[var(--bg)]/60 p-4">
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 rehypePlugins={[
-                  [rehypeAnnotate, { enabled: showPinyin, mode: "modern" }],
+                  [rehypeAnnotate, {
+                    enabled: showPinyin,
+                    mode: "modern",
+                    quoteMode: "classical",
+                  }]
                 ]}
               >
                 {answer}
@@ -163,7 +203,7 @@ export function AiSection({
             </div>
           ) : (
             <div className="rounded-xl bg-[var(--bg)]/60 p-6 text-center text-sm text-[var(--ink-soft)]">
-              {status === "streaming" ? "正在起卦解卦…" : ""}
+              {STATUS_LABELS[status] ?? ""}
             </div>
           )}
 
@@ -174,7 +214,7 @@ export function AiSection({
           )}
 
           <div className="mt-3 flex gap-2">
-            {status === "streaming" ? (
+            {isActive ? (
               <button
                 onClick={stop}
                 className="flex-1 rounded-lg border border-[var(--accent)] py-2.5 font-medium text-[var(--accent)] transition hover:bg-[var(--accent)]/5"

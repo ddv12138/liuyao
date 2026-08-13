@@ -3,6 +3,7 @@
 // 卦象与原文展示：本卦（卦辞 + 动爻爻辞/静卦提示）+ 变卦（卦辞 + 变爻爻辞）
 // 此阶段不涉及大模型
 import type { CastResult } from "@/lib/divination";
+import { getInterpretationGuide } from "@/lib/divination";
 import { AnnotatedText } from "@/components/AnnotatedText";
 import { HexagramFigure } from "@/components/HexagramFigure";
 
@@ -14,26 +15,28 @@ export function HexagramResult({
   showPinyin?: boolean;
 }) {
   const { original, changed, moving, yaos } = result;
+  const guide = getInterpretationGuide(result);
   const isStatic = moving.length === 0;
-
   return (
     <section className="fade-in-up grid gap-4 md:grid-cols-2">
-      <div className="rounded-2xl border border-[var(--line)] bg-[var(--paper)] p-5 shadow-sm">
+      <div className="md:col-span-2 rounded-xl border border-[var(--gold)]/30 bg-[var(--gold)]/5 px-4 py-3 text-sm text-[var(--ink-soft)]">
+        <span className="mr-2 font-medium text-[var(--gold)]">传统取辞</span>
+        {guide.rule}
+      </div>
+      <div className="relative rounded-2xl border border-[var(--line)] bg-[var(--paper)] p-5 shadow-sm">
         <div className="mb-3 flex justify-center">
           <HexagramFigure
             lines={yaos.map((y) => ({ yang: y.yang, moving: y.moving }))}
             size="normal"
           />
         </div>
+        <span className="absolute left-5 top-5 rounded-md bg-[var(--accent)] px-2 py-0.5 text-xs font-medium text-white">
+          本卦
+        </span>
         <div className="mb-3 text-center">
-          <div className="flex items-center justify-center gap-2">
-            <span className="rounded-md bg-[var(--accent)] px-2 py-0.5 text-xs font-medium text-white">
-              本卦
-            </span>
-            <h3 className="font-serif-cn text-2xl font-bold text-[var(--ink)]">
-              <AnnotatedText text={original.name} enabled={showPinyin} />
-            </h3>
-          </div>
+          <h3 className="font-serif-cn text-2xl font-bold text-[var(--ink)]">
+            <AnnotatedText text={original.name} enabled={showPinyin} />
+          </h3>
           <p className="mt-1 text-sm text-[var(--ink-soft)]">
             <AnnotatedText text={original.image} enabled={showPinyin} /> ·{" "}
             <AnnotatedText
@@ -76,7 +79,7 @@ export function HexagramResult({
       </div>
 
       {changed && (
-        <div className="fade-in-up rounded-2xl border border-[var(--line)] bg-[var(--paper)] p-5 shadow-sm">
+        <div className="relative fade-in-up rounded-2xl border border-[var(--line)] bg-[var(--paper)] p-5 shadow-sm">
           <div className="mb-3 flex justify-center">
             <HexagramFigure
               lines={changed.bits.map((b) => ({ yang: b === 1 }))}
@@ -84,15 +87,13 @@ export function HexagramResult({
               showMarkers={false}
             />
           </div>
+          <span className="absolute left-5 top-5 rounded-md bg-[var(--gold)] px-2 py-0.5 text-xs font-medium text-white">
+            变卦
+          </span>
           <div className="mb-3 text-center">
-            <div className="flex items-center justify-center gap-2">
-              <span className="rounded-md bg-[var(--gold)] px-2 py-0.5 text-xs font-medium text-white">
-                变卦
-              </span>
-              <h3 className="font-serif-cn text-2xl font-bold text-[var(--ink)]">
-                <AnnotatedText text={changed.name} enabled={showPinyin} />
-              </h3>
-            </div>
+            <h3 className="font-serif-cn text-2xl font-bold text-[var(--ink)]">
+              <AnnotatedText text={changed.name} enabled={showPinyin} />
+            </h3>
             <p className="mt-1 text-sm text-[var(--ink-soft)]">
               <AnnotatedText text={changed.image} enabled={showPinyin} /> ·{" "}
               <AnnotatedText

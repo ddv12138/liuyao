@@ -59,6 +59,8 @@ export async function POST(request: Request) {
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
       try {
+        // 先发送 SSE 注释，立即冲刷响应头，让客户端能展示“已连接、正在读取”。
+        controller.enqueue(encoder.encode(": connected\n\n"));
         for await (const chunk of streamChat(
           [
             { role: "system", content: system },
