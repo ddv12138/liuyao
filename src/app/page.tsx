@@ -2,7 +2,12 @@
 
 // 主页面：门禁 → 起卦 → 卦象/原文 → AI 解卦（流式）→ 历史
 import { useEffect, useRef, useState } from "react";
-import { cast, tossYao, type CastResult, type TossedYao } from "@/lib/divination";
+import {
+  cast,
+  tossYao,
+  type CastResult,
+  type TossedYao,
+} from "@/lib/divination";
 import {
   getAccessKey,
   setAccessKey,
@@ -29,6 +34,7 @@ export default function Page() {
   const [yaos, setYaos] = useState<TossedYao[]>([]);
   const [tossing, setTossing] = useState(false);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [showPinyin, setShowPinyin] = useState(true);
   const historyIdRef = useRef<string | null>(null);
   const tossTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -39,6 +45,7 @@ export default function Page() {
       setKey(k);
       setBooting(false);
       setHistory(loadHistory());
+      setShowPinyin(window.localStorage.getItem("liuyao_show_pinyin") !== "0");
     }, 0);
     return () => clearTimeout(t);
   }, []);
@@ -54,7 +61,7 @@ export default function Page() {
     () => () => {
       if (tossTimer.current) clearTimeout(tossTimer.current);
     },
-    []
+    [],
   );
 
   // 起卦：点击 → 动画 750ms → 出爻；第六爻落下即成卦并写入历史
@@ -88,7 +95,11 @@ export default function Page() {
     historyIdRef.current = null;
   }
 
-  function handleFinished(answer: string, truncated: boolean, question: string) {
+  function handleFinished(
+    answer: string,
+    truncated: boolean,
+    question: string,
+  ) {
     if (historyIdRef.current) {
       updateHistoryAnswer(historyIdRef.current, answer, truncated, question);
     }
@@ -118,26 +129,53 @@ export default function Page() {
     <main className="mx-auto max-w-2xl space-y-5 px-4 py-6 pb-16">
       <header className="flex items-center justify-between">
         <div>
-          <h1 className="font-serif-cn text-2xl font-bold text-[var(--ink)]">六爻占卦</h1>
-          <p className="text-xs text-[var(--ink-soft)]">铜钱起卦 · 卦辞爻辞 · AI 解卦</p>
+          <h1 className="font-serif-cn text-2xl font-bold text-[var(--ink)]">
+            六爻占卦
+          </h1>
+          <p className="text-xs text-[var(--ink-soft)]">
+            铜钱起卦 · 卦辞爻辞 · AI 解卦
+          </p>
         </div>
-        <button
-          onClick={lockout}
-          className="rounded-md border border-[var(--line)] px-2.5 py-1 text-xs text-[var(--ink-soft)] transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
-          title="清除口令并退出"
-        >
-          退出
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => {
+              const next = !showPinyin;
+              setShowPinyin(next);
+              window.localStorage.setItem(
+                "liuyao_show_pinyin",
+                next ? "1" : "0",
+              );
+            }}
+            aria-pressed={showPinyin}
+            className="rounded-md border border-[var(--line)] px-2.5 py-1 text-xs text-[var(--ink-soft)] transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
+            title="显示或隐藏生僻字注音"
+          >
+            注音 {showPinyin ? "开" : "关"}
+          </button>
+          <button
+            onClick={lockout}
+            className="rounded-md border border-[var(--line)] px-2.5 py-1 text-xs text-[var(--ink-soft)] transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
+            title="清除口令并退出"
+          >
+            退出
+          </button>
+        </div>
       </header>
 
-      <CastArea yaos={yaos} tossing={tossing} onToss={handleToss} onRestart={reset} />
+      <CastArea
+        yaos={yaos}
+        tossing={tossing}
+        onToss={handleToss}
+        onRestart={reset}
+      />
 
       {result && (
         <>
-          <HexagramResult result={result} />
+          <HexagramResult result={result} showPinyin={showPinyin} />
           <AiSection
             values={result.yaos.map((y) => y.value)}
             apiKey={key}
+            showPinyin={showPinyin}
             onFinished={handleFinished}
             onUnauthorized={lockout}
           />
@@ -154,6 +192,7 @@ export default function Page() {
 
       <HistorySection
         entries={history}
+        showPinyin={showPinyin}
         onDelete={(id) => {
           deleteHistoryEntry(id);
         }}

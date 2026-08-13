@@ -19,11 +19,18 @@ export function CastArea({
 }) {
   const done = yaos.length === 6;
   const nextIndex = yaos.length;
+  const lastYao = yaos[nextIndex - 1];
+  const figureLines = [
+    ...yaos.map((y) => ({ yang: y.yang, moving: y.moving })),
+    ...Array(Math.max(0, 6 - yaos.length)).fill(null),
+  ];
 
   return (
     <section className="rounded-2xl border border-[var(--line)] bg-[var(--paper)] p-5 shadow-sm">
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="font-serif-cn text-lg font-bold text-[var(--ink)]">起卦</h2>
+        <h2 className="font-serif-cn text-lg font-bold text-[var(--ink)]">
+          起卦
+        </h2>
         {yaos.length > 0 && !done && (
           <button
             onClick={onRestart}
@@ -34,51 +41,108 @@ export function CastArea({
         )}
       </div>
 
+      <div
+        className="mb-5 flex justify-center"
+        aria-label={`已掷 ${yaos.length} 爻`}
+      >
+        <HexagramFigure lines={figureLines} size="compact" />
+      </div>
+
       {!done ? (
         <>
-          <p className="mb-4 text-sm text-[var(--ink-soft)]">
-            掷 {6 - nextIndex} 次，每次点击掷三枚铜钱（自下而上得{nextIndex + 1}爻）
+          <p className="mb-4 text-center text-sm text-[var(--ink-soft)]">
+            掷 {6 - nextIndex} 次，每次点击掷三枚铜钱（自下而上得{nextIndex + 1}
+            爻）
           </p>
 
-          {/* 铜钱区 */}
-          <div className="mb-5 flex items-center justify-center gap-4">
-            {tossing ? (
-              [0, 1, 2].map((i) => (
-                <div key={i} className="coin coin-flipping coin-back">
-                  爻
-                </div>
-              ))
-            ) : yaos[nextIndex - 1] ? (
-              yaos[nextIndex - 1].coins.map((back, i) => (
-                <div key={i} className={`coin ${back ? "coin-back" : ""} fade-in-up`}>
-                  {back ? "背" : "字"}
-                </div>
-              ))
-            ) : (
-              [0, 1, 2].map((i) => (
-                <div key={i} className="coin opacity-25">
-                  卦
-                </div>
-              ))
-            )}
+          <div
+            className="mb-3 flex items-center justify-center gap-4"
+            aria-live="polite"
+          >
+            {(tossing
+              ? [true, true, true]
+              : (lastYao?.coins ?? [false, false, false])
+            ).map((back, i) => (
+              <Coin
+                key={i}
+                back={back}
+                flipping={tossing}
+                placeholder={!tossing && !lastYao}
+              />
+            ))}
           </div>
+          {lastYao && !tossing && <CoinSummary yao={lastYao} />}
 
           <button
             onClick={onToss}
             disabled={tossing}
-            className="w-full rounded-xl bg-[var(--accent)] py-3 text-lg font-medium text-white shadow-sm transition hover:bg-[var(--accent-dark)] disabled:opacity-60"
+            className="mt-3 w-full rounded-xl bg-[var(--accent)] py-3 text-lg font-medium text-white shadow-sm transition hover:bg-[var(--accent-dark)] disabled:opacity-60"
           >
-            {tossing ? "掷爻中…" : `掷第 ${nextIndex + 1} 爻（${POS_NAMES[nextIndex]}）`}
+            {tossing
+              ? "掷爻中…"
+              : `掷第 ${nextIndex + 1} 爻（${POS_NAMES[nextIndex]}）`}
           </button>
         </>
       ) : (
-        <p className="mb-3 text-sm font-medium text-[var(--ink-soft)]">六爻已齐</p>
+        <p className="text-center text-sm font-medium text-[var(--ink-soft)]">
+          六爻已齐
+        </p>
       )}
-
-      {/* 已掷出的爻，自下而上 */}
-      <div className="mt-5 flex justify-center">
-        <HexagramFigure lines={[...yaos, ...Array(Math.max(0, 6 - yaos.length)).fill(null)]} />
-      </div>
     </section>
+  );
+}
+
+function Coin({
+  back,
+  flipping,
+  placeholder,
+}: {
+  back: boolean;
+  flipping: boolean;
+  placeholder: boolean;
+}) {
+  return (
+    <div
+      className="coin-scene"
+      aria-label={placeholder ? "待掷铜钱" : back ? "铜钱背面" : "铜钱字面"}
+    >
+      <div
+        className={`coin ${back ? "coin-show-back" : ""} ${flipping ? "coin-flipping" : ""}`}
+      >
+        <CoinFace />
+        <CoinBack />
+      </div>
+    </div>
+  );
+}
+
+function CoinFace() {
+  return (
+    <div className="coin-face" aria-hidden="true">
+      <span className="coin-inscription coin-inscription-top">洪</span>
+      <span className="coin-inscription coin-inscription-right">武</span>
+      <span className="coin-inscription coin-inscription-bottom">通</span>
+      <span className="coin-inscription coin-inscription-left">宝</span>
+      <span className="coin-hole" />
+    </div>
+  );
+}
+
+function CoinBack() {
+  return (
+    <div className="coin-face coin-face-back" aria-hidden="true">
+      <span className="coin-inscription coin-back-mark">十</span>
+      <span className="coin-hole" />
+    </div>
+  );
+}
+
+function CoinSummary({ yao }: { yao: TossedYao }) {
+  const backWord = ["零", "一", "二", "三"][yao.backs];
+  const wordWord = ["三", "二", "一", "零"][yao.backs];
+  return (
+    <p className="coin-summary">
+      {backWord}背{wordWord}字 → {yao.label}
+    </p>
   );
 }

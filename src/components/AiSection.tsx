@@ -5,17 +5,20 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { postSSE } from "@/lib/sse";
+import { rehypeAnnotate } from "@/lib/rehype-annotate";
 
 export type AiStatus = "idle" | "dialog" | "streaming" | "done" | "error";
 
 export function AiSection({
   values,
   apiKey,
+  showPinyin = true,
   onUnauthorized,
   onFinished,
 }: {
   values: number[];
   apiKey: string;
+  showPinyin?: boolean;
   /** 解析完成（含中断/出错）时回写历史 */
   onFinished: (answer: string, truncated: boolean, question: string) => void;
   onUnauthorized: () => void;
@@ -26,7 +29,6 @@ export function AiSection({
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const finishedRef = useRef(false);
-  // 组件卸载（如"再占一次"）时中止未完成的流
   useEffect(() => () => abortRef.current?.abort(), []);
 
   const start = useCallback(
@@ -39,41 +41,34 @@ export function AiSection({
       const abort = new AbortController();
       abortRef.current = abort;
 
-      postSSE(
-        "/api/interpret",
-        { values, question: q },
-        apiKey,
-        abort.signal,
-        {
-          onContent: (chunk) => setAnswer((prev) => prev + chunk),
-          onDone: () => {
-            if (finishedRef.current) return;
-            finishedRef.current = true;
-            setStatus("done");
-            setAnswer((prev) => {
-              onFinished(prev, false, q);
-              return prev;
-            });
-          },
-          onError: (message) => {
-            if (finishedRef.current) return;
-            finishedRef.current = true;
-            setStatus("error");
-            setErrorMsg(message);
-            setAnswer((prev) => {
-              onFinished(prev, true, q);
-              return prev;
-            });
-          },
-          onStatus: (s) => {
-            if (s === 401) onUnauthorized();
-          },
-        }
-      ).catch((err) => {
+      postSSE("/api/interpret", { values, question: q }, apiKey, abort.signal, {
+        onContent: (chunk) => setAnswer((prev) => prev + chunk),
+        onDone: () => {
+          if (finishedRef.current) return;
+          finishedRef.current = true;
+          setStatus("done");
+          setAnswer((prev) => {
+            onFinished(prev, false, q);
+            return prev;
+          });
+        },
+        onError: (message) => {
+          if (finishedRef.current) return;
+          finishedRef.current = true;
+          setStatus("error");
+          setErrorMsg(message);
+          setAnswer((prev) => {
+            onFinished(prev, true, q);
+            return prev;
+          });
+        },
+        onStatus: (s) => {
+          if (s === 401) onUnauthorized();
+        },
+      }).catch((err) => {
         if (finishedRef.current) return;
         finishedRef.current = true;
         if ((err as Error)?.name === "AbortError") {
-          // 用户点击停止
           setStatus("done");
           setAnswer((prev) => {
             onFinished(prev, true, q);
@@ -89,13 +84,12 @@ export function AiSection({
         }
       });
     },
-    [values, apiKey, onFinished, onUnauthorized]
+    [values, apiKey, onFinished, onUnauthorized],
   );
 
   const stop = useCallback(() => {
     abortRef.current?.abort();
   }, []);
-
 
   return (
     <section className="rounded-2xl border border-[var(--line)] bg-[var(--paper)] p-5 shadow-sm">
@@ -115,7 +109,9 @@ export function AiSection({
 
       {status === "dialog" && (
         <div className="fade-in-up">
-          <p className="mb-2 text-sm font-medium text-[var(--ink)]">是否附上你的问题？</p>
+          <p className="mb-2 text-sm font-medium text-[var(--ink)]">
+            是否附上你的问题？
+          </p>
           <textarea
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
@@ -143,7 +139,9 @@ export function AiSection({
       {(status === "streaming" || status === "done" || status === "error") && (
         <div className="fade-in-up">
           <div className="mb-2 flex items-center justify-between">
-            <h3 className="font-serif-cn text-base font-bold text-[var(--ink)]">AI 解卦</h3>
+            <h3 className="font-serif-cn text-base font-bold text-[var(--ink)]">
+              AI 解卦
+            </h3>
             {question && (
               <span className="max-w-[60%] truncate rounded-md bg-[var(--bg)] px-2 py-0.5 text-xs text-[var(--ink-soft)]">
                 问：{question}
@@ -153,7 +151,14 @@ export function AiSection({
 
           {answer ? (
             <div className="prose-yi rounded-xl bg-[var(--bg)]/60 p-4">
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>{answer}</ReactMarkdown>
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                rehypePlugins={[
+                  [rehypeAnnotate, { enabled: showPinyin, mode: "modern" }],
+                ]}
+              >
+                {answer}
+              </ReactMarkdown>
               {status === "streaming" && <span className="stream-cursor" />}
             </div>
           ) : (
