@@ -47,16 +47,16 @@ describe("HexagramFigure", () => {
 
     expect(count(markup, 'class="yao-svg-placeholder"')).toBe(1);
     expect(count(markup, 'class="yao-svg-bar"')).toBe(0);
-    expect(count(markup, 'class="yao-marker-svg"')).toBe(1);
+    expect(markup).toContain('viewBox="0 0 240 20"');
+    expect(markup).not.toContain("yao-svg-marker");
   });
 
-  it("keeps a hidden marker slot when markers are disabled", () => {
+  it("keeps the same SVG geometry when markers are disabled", () => {
     const markup = renderToStaticMarkup(
       <HexagramFigure lines={[{ yang: true, moving: true }]} showMarkers={false} />,
     );
 
-    expect(count(markup, 'class="yao-marker-svg"')).toBe(1);
-    expect(markup).not.toContain("yao-marker-svg-visible");
+    expect(markup).toContain('viewBox="0 0 240 20"');
     expect(markup).not.toContain("yao-svg-marker");
     expect(markup).toContain('class="yao-svg-bar"');
   });

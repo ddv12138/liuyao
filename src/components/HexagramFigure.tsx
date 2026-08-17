@@ -51,38 +51,32 @@ export function HexagramFigure({
             <div className="yao-track">
               <svg
                 className="yao-svg"
-                viewBox="0 0 200 16"
+                viewBox="0 0 240 20"
+                shapeRendering="geometricPrecision"
                 aria-hidden="true"
                 focusable="false"
               >
                 {spec ? (
                   spec.yang ? (
-                    <rect className="yao-svg-bar" x="0" y="2" width="200" height="12" rx="2" />
+                    <rect className="yao-svg-bar" x="0" y="5" width="190" height="10" rx="1.8" />
                   ) : (
                     <>
-                      <rect className="yao-svg-bar" x="0" y="2" width="90" height="12" rx="2" />
-                      <rect className="yao-svg-bar" x="110" y="2" width="90" height="12" rx="2" />
+                      <rect className="yao-svg-bar" x="0" y="5" width="87" height="10" rx="1.8" />
+                      <rect className="yao-svg-bar" x="103" y="5" width="87" height="10" rx="1.8" />
                     </>
                   )
                 ) : (
-                  <rect className="yao-svg-placeholder" x="0.5" y="2.5" width="199" height="11" rx="2" />
+                  <rect className="yao-svg-placeholder" x="0.75" y="5.25" width="188.5" height="9.5" rx="1.8" />
                 )}
+                {showMarkers && spec?.moving ? (
+                  spec.yang ? (
+                    <circle className="yao-svg-marker" cx="220" cy="10" r="5.5" />
+                  ) : (
+                    <path className="yao-svg-marker" d="M215 5 L225 15 M225 5 L215 15" />
+                  )
+                ) : null}
               </svg>
             </div>
-            <svg
-              className={`yao-marker-svg${showMarkers && spec?.moving ? " yao-marker-svg-visible" : ""}`}
-              viewBox="0 0 20 20"
-              aria-hidden="true"
-              focusable="false"
-            >
-              {showMarkers && spec?.moving ? (
-                spec.yang ? (
-                  <circle className="yao-svg-marker" cx="10" cy="10" r="7" />
-                ) : (
-                  <path className="yao-svg-marker" d="M4.5 4.5 L15.5 15.5 M15.5 4.5 L4.5 15.5" />
-                )
-              ) : null}
-            </svg>
             {showInfo && spec?.info && (
               <>
                 <button

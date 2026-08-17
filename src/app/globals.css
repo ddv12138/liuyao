@@ -131,10 +131,8 @@ body {
   flex-direction: column;
   gap: var(--yao-row-gap);
   --yao-line-width: 4.8rem;
-  --yao-row-height: 0.78rem;
-  --yao-row-gap: 0.1rem;
-  --yao-marker-size: 0.72rem;
-  --yao-marker-gap: 0.22rem;
+  --yao-row-height: 0.42rem;
+  --yao-row-gap: 0.06rem;
   --yao-color: var(--ink);
   --yao-moving-color: var(--accent);
 }
@@ -263,7 +261,7 @@ body {
   display: block;
   flex: none;
   width: var(--yao-line-width);
-  aspect-ratio: 200 / 16;
+  aspect-ratio: 240 / 20;
 }
 
 .yao-svg {
@@ -281,34 +279,23 @@ body {
 .yao-svg-placeholder {
   fill: none;
   stroke: var(--line);
-  stroke-dasharray: 4 3;
+  stroke-dasharray: 3 3;
+  stroke-opacity: 0.6;
   stroke-width: 1;
-  vector-effect: non-scaling-stroke;
-}
-
-.yao-marker-svg {
-  flex: none;
-  width: var(--yao-marker-size);
-  height: var(--yao-marker-size);
-  margin-left: var(--yao-marker-gap);
-  overflow: visible;
-  color: var(--yao-moving-color);
 }
 
 .yao-svg-marker {
   fill: none;
+  color: var(--yao-moving-color);
   stroke: currentColor;
   stroke-linecap: round;
-  stroke-width: 2;
-  vector-effect: non-scaling-stroke;
+  stroke-width: 1.5;
 }
 
 .hexagram-compact {
   --yao-line-width: 3.5rem;
-  --yao-row-height: 0.6rem;
-  --yao-row-gap: 0.06rem;
-  --yao-marker-size: 0.58rem;
-  --yao-marker-gap: 0.16rem;
+  --yao-row-height: 0.3rem;
+  --yao-row-gap: 0.04rem;
 }
 
 @media (max-width: 420px) {
@@ -348,16 +335,14 @@ ruby.ruby-annotated rt {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 3.2rem;
-  min-width: 3.2rem;
+  width: 2.5rem;
+  min-width: 2.5rem;
 }
 
 .history-figure .hexagram-compact {
   --yao-line-width: 2.35rem;
-  --yao-row-height: 0.5rem;
-  --yao-row-gap: 0.04rem;
-  --yao-marker-size: 0.48rem;
-  --yao-marker-gap: 0.12rem;
+  --yao-row-height: 0.22rem;
+  --yao-row-gap: 0.02rem;
 }
 
 @keyframes yao-appear {
