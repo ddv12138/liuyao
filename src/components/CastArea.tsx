@@ -54,7 +54,12 @@ export function CastArea({
         className="mb-5 flex justify-center"
         aria-label={`已掷 ${yaos.length} 爻`}
       >
-        <HexagramFigure lines={figureLines} size="compact" showLabels={done} />
+        <HexagramFigure
+          lines={figureLines}
+          size="normal"
+          className="hexagram-cast"
+          showLabels={done}
+        />
       </div>
 
       {!done ? (
