@@ -55,6 +55,7 @@ export function HexagramResult({
         const annotation = changedAnnotations[index];
         return {
           yang: bit === 1,
+          moving: moving.includes(index),
           label: getAnnotationLabel(index, name, annotation, showAllLines),
           labelTone: annotation?.tone ?? "neutral",
           info: getYaoInfo("变卦", name, annotation, changed.lines[index]?.text ?? ""),

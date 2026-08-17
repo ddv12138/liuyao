@@ -291,6 +291,10 @@ body {
   fill: currentColor;
 }
 
+.yao-svg-bar-moving {
+  fill: var(--yao-moving-color);
+}
+
 .yao-svg-placeholder {
   fill: none;
   stroke: var(--line);

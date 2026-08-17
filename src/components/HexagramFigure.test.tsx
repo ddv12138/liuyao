@@ -20,7 +20,8 @@ describe("HexagramFigure", () => {
     );
 
     // Two yang bars plus two segments for each of the two yin lines.
-    expect(count(markup, 'class="yao-svg-bar"')).toBe(6);
+    expect(count(markup, 'class="yao-svg-bar"')).toBe(3);
+    expect(count(markup, 'class="yao-svg-bar yao-svg-bar-moving"')).toBe(3);
     expect(count(markup, 'class="yao-svg-marker"')).toBe(2);
     expect(markup).toContain('<circle class="yao-svg-marker"');
     expect(markup).toContain('<path class="yao-svg-marker"');
@@ -58,10 +59,25 @@ describe("HexagramFigure", () => {
 
     expect(markup).toContain('viewBox="0 0 240 20"');
     expect(markup).not.toContain("yao-svg-marker");
-    expect(markup).toContain('class="yao-svg-bar"');
+    expect(markup).toContain('class="yao-svg-bar yao-svg-bar-moving"');
   });
 
-  it("renders info slots only for annotated rows", () => {
+  it("renders info slots only for non-moving annotated rows", () => {
+    const markup = renderToStaticMarkup(
+      <HexagramFigure
+        lines={[
+          { yang: true, moving: false, info: { title: "九五", relation: "主断", text: "飞龙在天" } },
+          { yang: true, moving: true, info: { title: "初九", relation: "动爻", text: "潜龙勿用" } },
+        ]}
+        showInfo
+      />,
+    );
+
+    expect(count(markup, "yao-info-slot")).toBe(1);
+    expect(count(markup, "yao-info-trigger")).toBe(1);
+  });
+
+  it("marks moving yao by color and omits its info slot", () => {
     const markup = renderToStaticMarkup(
       <HexagramFigure
         lines={[
@@ -72,7 +88,7 @@ describe("HexagramFigure", () => {
       />,
     );
 
-    expect(count(markup, "yao-info-slot")).toBe(1);
-    expect(count(markup, "yao-info-trigger")).toBe(1);
+    expect(count(markup, "yao-info-slot")).toBe(0);
+    expect(count(markup, "yao-svg-bar-moving")).toBe(1);
   });
 });

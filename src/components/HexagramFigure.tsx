@@ -58,11 +58,32 @@ export function HexagramFigure({
               >
                 {spec ? (
                   spec.yang ? (
-                    <rect className="yao-svg-bar" x="0" y="5" width="190" height="10" rx="1.8" />
+                    <rect
+                      className={`yao-svg-bar${spec.moving ? " yao-svg-bar-moving" : ""}`}
+                      x="0"
+                      y="5"
+                      width="190"
+                      height="10"
+                      rx="1.8"
+                    />
                   ) : (
                     <>
-                      <rect className="yao-svg-bar" x="0" y="5" width="87" height="10" rx="1.8" />
-                      <rect className="yao-svg-bar" x="103" y="5" width="87" height="10" rx="1.8" />
+                      <rect
+                        className={`yao-svg-bar${spec.moving ? " yao-svg-bar-moving" : ""}`}
+                        x="0"
+                        y="5"
+                        width="87"
+                        height="10"
+                        rx="1.8"
+                      />
+                      <rect
+                        className={`yao-svg-bar${spec.moving ? " yao-svg-bar-moving" : ""}`}
+                        x="103"
+                        y="5"
+                        width="87"
+                        height="10"
+                        rx="1.8"
+                      />
                     </>
                   )
                 ) : (
@@ -77,7 +98,7 @@ export function HexagramFigure({
                 ) : null}
               </svg>
             </div>
-            {showInfo && spec?.info && (
+            {showInfo && spec?.info && !spec?.moving && (
               <span className="yao-info-slot">
                 <button
                   type="button"
