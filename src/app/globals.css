@@ -130,6 +130,11 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
+  --yao-line-width: 6rem;
+  --yao-marker-size: 1.1rem;
+  --yao-marker-gap: 0.5rem;
+  --yao-color: var(--ink);
+  --yao-moving-color: var(--accent);
 }
 
 .yao-line {
@@ -253,53 +258,65 @@ body {
 
 
 .yao-track {
-  display: flex;
-  align-items: center;
+  display: block;
   flex: none;
-  width: 6rem;
-  gap: 0.5rem;
+  width: var(--yao-line-width);
+  aspect-ratio: 200 / 16;
 }
 
-.hexagram-compact .yao-track {
-  width: 4.5rem;
-  gap: 0.4rem;
-}
-
-.yao-bar,
-.yao-placeholder {
-  height: 0.5rem;
-  border-radius: 2px;
-  background: var(--ink);
-}
-
-.yao-track > .yao-bar:only-child,
-.yao-placeholder {
+.yao-svg {
+  display: block;
   width: 100%;
+  height: 100%;
+  overflow: visible;
+  color: var(--yao-color);
 }
 
-.yao-yin-segment {
-  flex: 1 1 0;
-  min-width: 0;
+.yao-svg-bar {
+  fill: currentColor;
 }
 
-.yao-placeholder {
-  border: 1px dashed var(--line);
-  background: transparent;
+.yao-svg-placeholder {
+  fill: none;
+  stroke: var(--line);
+  stroke-dasharray: 4 3;
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
 }
 
-.yao-marker {
-  width: 1.1rem;
-  min-width: 1.1rem;
-  margin-left: 0.5rem;
-  color: var(--accent);
-  font-size: 0.85rem;
-  font-weight: 700;
-  line-height: 1;
-  text-align: center;
+.yao-marker-svg {
+  flex: none;
+  width: var(--yao-marker-size);
+  height: var(--yao-marker-size);
+  margin-left: var(--yao-marker-gap);
+  overflow: visible;
+  color: var(--yao-moving-color);
 }
 
-.yao-marker:not(.yao-marker-visible) {
-  color: transparent;
+.yao-svg-marker {
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
+.hexagram-compact {
+  --yao-line-width: 4.5rem;
+  --yao-marker-size: 1rem;
+  --yao-marker-gap: 0.4rem;
+}
+
+@media (max-width: 420px) {
+  .hexagram-normal {
+    --yao-line-width: min(6rem, 30vw);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .yao-appear {
+    animation: none;
+  }
 }
 
 /* ---- 注音 ---- */

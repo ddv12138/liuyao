@@ -1,6 +1,6 @@
 "use client";
 
-// 卦象六爻图：自下而上绘制。阳爻实线，阴爻两段；动爻标 ○/×。
+// 卦象六爻图：数据自下而上保存，视觉从上爻到初爻显示。阳爻实线，阴爻两段；动爻用 SVG 圆环/交叉标记。
 export interface YaoInfo {
   title: string;
   relation: string;
@@ -49,25 +49,41 @@ export function HexagramFigure({
         return (
           <div key={i} className="yao-line yao-appear">
             <div className="yao-track">
-              {spec ? (
-                spec.yang ? (
-                  <div className="yao-bar" />
+              <svg
+                className="yao-svg"
+                viewBox="0 0 200 16"
+                aria-hidden="true"
+                focusable="false"
+              >
+                {spec ? (
+                  spec.yang ? (
+                    <rect className="yao-svg-bar" x="0" y="2" width="200" height="12" rx="2" />
+                  ) : (
+                    <>
+                      <rect className="yao-svg-bar" x="0" y="2" width="90" height="12" rx="2" />
+                      <rect className="yao-svg-bar" x="110" y="2" width="90" height="12" rx="2" />
+                    </>
+                  )
                 ) : (
-                  <>
-                    <div className="yao-bar yao-yin-segment" />
-                    <div className="yao-bar yao-yin-segment" />
-                  </>
-                )
-              ) : (
-                <div className="yao-placeholder" />
-              )}
+                  <rect className="yao-svg-placeholder" x="0.5" y="2.5" width="199" height="11" rx="2" />
+                )}
+              </svg>
             </div>
             {showMarkers && (
-              <span
-                className={`yao-marker ${spec?.moving ? "yao-marker-visible" : ""}`}
+              <svg
+                className={`yao-marker-svg${spec?.moving ? " yao-marker-svg-visible" : ""}`}
+                viewBox="0 0 20 20"
+                aria-hidden="true"
+                focusable="false"
               >
-                {spec?.moving ? (spec.yang ? "○" : "×") : "\u00a0"}
-              </span>
+                {spec?.moving ? (
+                  spec.yang ? (
+                    <circle className="yao-svg-marker" cx="10" cy="10" r="7" />
+                  ) : (
+                    <path className="yao-svg-marker" d="M4.5 4.5 L15.5 15.5 M15.5 4.5 L4.5 15.5" />
+                  )
+                ) : null}
+              </svg>
             )}
             {showInfo && spec?.info && (
               <>
