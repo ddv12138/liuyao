@@ -50,3 +50,17 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - **React 19 lint**：effect 内同步 setState、渲染期 `Math.random` 都会被 eslint 拒绝——本项目用 setTimeout/事件驱动与渲染期派生规避（`page.tsx` 是范本，`CastArea` 起卦动画同）。
 - **历史/门禁**：存 localStorage；历史变更由 `liuyao-history-changed` 事件驱动刷新（`storage.ts` 内派发，勿在组件里直接写 localStorage）。
 - 改代码前先读上方 Next.js 16 官方提醒与 `node_modules/next/dist/docs/` 对应章节。
+
+## Agent skills
+
+### Issue tracker
+
+Issues and specs live in GitHub Issues; use the `gh` CLI. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Use the five canonical triage labels as-is: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, and `wontfix`. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+This is a single-context repo using root `CONTEXT.md` and `docs/adr/`. See `docs/agents/domain.md`.
