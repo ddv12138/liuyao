@@ -60,4 +60,19 @@ describe("HexagramFigure", () => {
     expect(markup).not.toContain("yao-svg-marker");
     expect(markup).toContain('class="yao-svg-bar"');
   });
+
+  it("balances only rows that have a side element", () => {
+    const markup = renderToStaticMarkup(
+      <HexagramFigure
+        lines={[
+          { yang: true, moving: true, info: { title: "初九", relation: "动爻", text: "潜龙勿用" } },
+          { yang: false, moving: false },
+        ]}
+        showInfo
+      />,
+    );
+
+    expect(count(markup, "yao-line-has-side")).toBe(1);
+    expect(count(markup, "yao-info-slot")).toBe(1);
+  });
 });
