@@ -1,6 +1,8 @@
 // 客户端 SSE 流式请求工具
 // 解析后端 /api/interpret 的 text/event-stream：data: {content} ... data: [DONE]
 
+import { SseParser, type SseEvent } from "@/lib/sse-parser";
+
 export interface StreamHandlers {
   onContent: (chunk: string) => void;
   onDone: () => void;
@@ -16,7 +18,7 @@ export async function postSSE(
   body: unknown,
   apiKey: string,
   signal: AbortSignal,
-  handlers: StreamHandlers
+  handlers: StreamHandlers,
 ): Promise<void> {
   const res = await fetch(url, {
     method: "POST",
@@ -44,43 +46,55 @@ export async function postSSE(
     handlers.onError("响应无内容流");
     return;
   }
+
   handlers.onConnected?.();
   const reader = res.body.getReader();
   const decoder = new TextDecoder();
-  let buffer = "";
+  const parser = new SseParser();
+  let terminal = false;
+
+  const handleEvent = (event: SseEvent) => {
+    if (terminal) return;
+    if (event.data === "[DONE]") {
+      terminal = true;
+      handlers.onDone();
+      return;
+    }
+
+    try {
+      const json = JSON.parse(event.data);
+      if (typeof json?.content === "string" && json.content.length > 0) {
+        handlers.onContent(json.content);
+      } else if (typeof json?.error === "string") {
+        terminal = true;
+        handlers.onError(json.error);
+      }
+    } catch {
+      // 非 JSON 的 data 帧不能结束正常流；若最终没有 DONE，会报告流异常。
+    }
+  };
+
+  const handleEvents = (events: SseEvent[]) => {
+    for (const event of events) {
+      handleEvent(event);
+      if (terminal) break;
+    }
+  };
 
   try {
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
-      buffer += decoder.decode(value, { stream: true });
-
-      let sep: number;
-      while ((sep = buffer.indexOf("\n\n")) !== -1) {
-        const frame = buffer.slice(0, sep);
-        buffer = buffer.slice(sep + 2);
-        for (const line of frame.split("\n")) {
-          if (!line.startsWith("data:")) continue;
-          const payload = line.slice(5).trim();
-          if (payload === "[DONE]") {
-            handlers.onDone();
-            return;
-          }
-          try {
-            const json = JSON.parse(payload);
-            if (typeof json?.content === "string" && json.content.length > 0) {
-              handlers.onContent(json.content);
-            } else if (typeof json?.error === "string") {
-              handlers.onError(json.error);
-              return;
-            }
-          } catch {
-            /* 忽略无法解析的帧 */
-          }
-        }
-      }
+      handleEvents(parser.push(decoder.decode(value, { stream: true })));
+      if (terminal) return;
     }
-    handlers.onDone();
+
+    handleEvents(parser.push(decoder.decode()));
+    if (terminal) return;
+    handleEvents(parser.end());
+    if (terminal) return;
+
+    handlers.onError("解卦流未正常结束，请重试");
   } finally {
     reader.releaseLock();
   }

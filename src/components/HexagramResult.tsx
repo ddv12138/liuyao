@@ -16,13 +16,15 @@ import { HexagramFigure, type LineSpec } from "@/components/HexagramFigure";
 export function HexagramResult({
   result,
   showPinyin = true,
+  shareMode = false,
 }: {
   result: CastResult;
   showPinyin?: boolean;
+  shareMode?: boolean;
 }) {
   const { original, changed, moving, yaos } = result;
   const guide = getInterpretationGuide(result);
-  const [showAllLines, setShowAllLines] = useState(false);
+  const [showAllLines, setShowAllLines] = useState(shareMode);
   const [openInfoId, setOpenInfoId] = useState<string | null>(null);
   useEffect(() => {
     const closeOnOutsidePointer = (event: PointerEvent) => {
@@ -64,7 +66,7 @@ export function HexagramResult({
   };
 
   return (
-    <section className="fade-in-up grid gap-4 md:grid-cols-2">
+    <section className={`grid gap-4 md:grid-cols-2 ${shareMode ? "share-hexagram-result" : "fade-in-up"}`}>
       <div className="md:col-span-2 rounded-xl border border-[var(--gold)]/30 bg-[var(--gold)]/5 px-4 py-3 text-sm text-[var(--ink-soft)]">
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
           <span className="font-medium text-[var(--gold)]">传统取辞</span>
@@ -74,17 +76,19 @@ export function HexagramResult({
               {guide.special} · 主断
             </span>
           )}
-          <button
-            type="button"
-            aria-pressed={showAllLines}
-            onClick={() => {
-              setShowAllLines((current) => !current);
-              setOpenInfoId(null);
-            }}
-            className="rounded-md border border-[var(--line)] bg-[var(--paper)] px-2.5 py-1 text-xs text-[var(--ink-soft)] transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
-          >
-            {showAllLines ? "收起爻位" : "显示全部爻位"}
-          </button>
+          {!shareMode && (
+            <button
+              type="button"
+              aria-pressed={showAllLines}
+              onClick={() => {
+                setShowAllLines((current) => !current);
+                setOpenInfoId(null);
+              }}
+              className="rounded-md border border-[var(--line)] bg-[var(--paper)] px-2.5 py-1 text-xs text-[var(--ink-soft)] transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
+            >
+              {showAllLines ? "收起爻位" : "显示全部爻位"}
+            </button>
+          )}
         </div>
       </div>
 

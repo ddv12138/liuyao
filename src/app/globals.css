@@ -437,3 +437,84 @@ ruby.ruby-annotated rt {
 .prose-yi em {
   font-style: italic;
 }
+
+/* ---- 长图分享专用画布 ---- */
+.share-render-root {
+  position: fixed;
+  top: 0;
+  left: -10000px;
+  width: 720px;
+  box-sizing: border-box;
+  padding: 36px;
+  background: var(--bg);
+  color: var(--ink);
+  pointer-events: none;
+}
+
+.share-render-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 14px;
+}
+
+.share-render-brand {
+  font-family: var(--font-serif-cn), "Songti SC", serif;
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.share-render-date,
+.share-render-status {
+  color: var(--ink-soft);
+  font-size: 13px;
+}
+
+.share-render-status {
+  margin-top: 14px;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.share-render-question,
+.share-render-answer {
+  margin-top: 20px;
+  border-radius: 14px;
+  padding: 16px 18px;
+  background: color-mix(in srgb, var(--paper) 80%, transparent);
+}
+
+.share-render-question strong {
+  color: var(--gold);
+  font-size: 13px;
+}
+
+.share-render-question p {
+  margin: 6px 0 0;
+  line-height: 1.7;
+}
+
+.share-render-answer h2 {
+  margin: 0 0 10px;
+  color: var(--accent-dark);
+  font-family: var(--font-serif-cn), "Songti SC", serif;
+  font-size: 20px;
+}
+
+.share-render-root .hexagram-result {
+  margin-top: 20px;
+}
+
+.share-render-disclaimer {
+  margin: 22px 0 0;
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+  color: var(--ink-soft);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.share-hexagram-result {
+  animation: none !important;
+}

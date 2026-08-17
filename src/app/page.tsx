@@ -14,6 +14,7 @@ import {
   clearAccessKey,
   loadHistory,
   addHistoryEntry,
+  updateHistoryStatus,
   updateHistoryAnswer,
   deleteHistoryEntry,
   clearHistory,
@@ -23,7 +24,7 @@ import {
 import { KeyGate } from "@/components/KeyGate";
 import { CastArea } from "@/components/CastArea";
 import { HexagramResult } from "@/components/HexagramResult";
-import { AiSection } from "@/components/AiSection";
+import { AiSection, type AiFinishStatus } from "@/components/AiSection";
 import { HistorySection } from "@/components/HistorySection";
 
 export default function Page() {
@@ -32,6 +33,7 @@ export default function Page() {
   const [booting, setBooting] = useState(true);
 
   const [yaos, setYaos] = useState<TossedYao[]>([]);
+  const [castAt, setCastAt] = useState<number | null>(null);
   const [tossing, setTossing] = useState(false);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [showPinyin, setShowPinyin] = useState(true);
@@ -75,7 +77,9 @@ export default function Page() {
       if (next.length === 6) {
         const r = cast(next);
         if (r) {
+          setCastAt(Date.now());
           historyIdRef.current = addHistoryEntry({
+            cast: r,
             values: next.map((y) => y.value),
             originalName: r.original.name,
             originalImage: r.original.image,
@@ -92,16 +96,23 @@ export default function Page() {
 
   function reset() {
     setYaos([]);
+    setCastAt(null);
     historyIdRef.current = null;
+  }
+
+  function handleStarted(question: string) {
+    if (historyIdRef.current) {
+      updateHistoryStatus(historyIdRef.current, "generating", question);
+    }
   }
 
   function handleFinished(
     answer: string,
-    truncated: boolean,
+    status: AiFinishStatus,
     question: string,
   ) {
     if (historyIdRef.current) {
-      updateHistoryAnswer(historyIdRef.current, answer, truncated, question);
+      updateHistoryAnswer(historyIdRef.current, answer, status, question);
     }
   }
 
@@ -175,7 +186,9 @@ export default function Page() {
           <AiSection
             values={result.yaos.map((y) => y.value)}
             apiKey={key}
+            castAt={castAt ?? 0}
             showPinyin={showPinyin}
+            onStarted={handleStarted}
             onFinished={handleFinished}
             onUnauthorized={lockout}
           />
