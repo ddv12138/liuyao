@@ -69,22 +69,20 @@ export function HexagramFigure({
                 )}
               </svg>
             </div>
-            {showMarkers && (
-              <svg
-                className={`yao-marker-svg${spec?.moving ? " yao-marker-svg-visible" : ""}`}
-                viewBox="0 0 20 20"
-                aria-hidden="true"
-                focusable="false"
-              >
-                {spec?.moving ? (
-                  spec.yang ? (
-                    <circle className="yao-svg-marker" cx="10" cy="10" r="7" />
-                  ) : (
-                    <path className="yao-svg-marker" d="M4.5 4.5 L15.5 15.5 M15.5 4.5 L4.5 15.5" />
-                  )
-                ) : null}
-              </svg>
-            )}
+            <svg
+              className={`yao-marker-svg${showMarkers && spec?.moving ? " yao-marker-svg-visible" : ""}`}
+              viewBox="0 0 20 20"
+              aria-hidden="true"
+              focusable="false"
+            >
+              {showMarkers && spec?.moving ? (
+                spec.yang ? (
+                  <circle className="yao-svg-marker" cx="10" cy="10" r="7" />
+                ) : (
+                  <path className="yao-svg-marker" d="M4.5 4.5 L15.5 15.5 M15.5 4.5 L4.5 15.5" />
+                )
+              ) : null}
+            </svg>
             {showInfo && spec?.info && (
               <>
                 <button

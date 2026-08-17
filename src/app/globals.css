@@ -130,11 +130,11 @@ body {
   display: flex;
   flex-direction: column;
   gap: var(--yao-row-gap);
-  --yao-line-width: 6rem;
-  --yao-row-height: 0.85rem;
-  --yao-row-gap: 0.16rem;
-  --yao-marker-size: 0.85rem;
-  --yao-marker-gap: 0.3rem;
+  --yao-line-width: 4.8rem;
+  --yao-row-height: 0.78rem;
+  --yao-row-gap: 0.1rem;
+  --yao-marker-size: 0.72rem;
+  --yao-marker-gap: 0.22rem;
   --yao-color: var(--ink);
   --yao-moving-color: var(--accent);
 }
@@ -304,16 +304,16 @@ body {
 }
 
 .hexagram-compact {
-  --yao-line-width: 4.5rem;
-  --yao-row-height: 0.7rem;
-  --yao-row-gap: 0.1rem;
-  --yao-marker-size: 0.7rem;
-  --yao-marker-gap: 0.24rem;
+  --yao-line-width: 3.5rem;
+  --yao-row-height: 0.6rem;
+  --yao-row-gap: 0.06rem;
+  --yao-marker-size: 0.58rem;
+  --yao-marker-gap: 0.16rem;
 }
 
 @media (max-width: 420px) {
   .hexagram-normal {
-    --yao-line-width: min(6rem, 30vw);
+    --yao-line-width: min(4.8rem, 30vw);
   }
 }
 
@@ -348,16 +348,16 @@ ruby.ruby-annotated rt {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 3.8rem;
-  min-width: 3.8rem;
+  width: 3.2rem;
+  min-width: 3.2rem;
 }
 
 .history-figure .hexagram-compact {
-  --yao-line-width: 2.9rem;
-  --yao-row-height: 0.62rem;
-  --yao-row-gap: 0.08rem;
-  --yao-marker-size: 0.62rem;
-  --yao-marker-gap: 0.18rem;
+  --yao-line-width: 2.35rem;
+  --yao-row-height: 0.5rem;
+  --yao-row-gap: 0.04rem;
+  --yao-marker-size: 0.48rem;
+  --yao-marker-gap: 0.12rem;
 }
 
 @keyframes yao-appear {

@@ -50,12 +50,14 @@ describe("HexagramFigure", () => {
     expect(count(markup, 'class="yao-marker-svg"')).toBe(1);
   });
 
-  it("omits marker slots when markers are disabled", () => {
+  it("keeps a hidden marker slot when markers are disabled", () => {
     const markup = renderToStaticMarkup(
       <HexagramFigure lines={[{ yang: true, moving: true }]} showMarkers={false} />,
     );
 
-    expect(markup).not.toContain("yao-marker-svg");
+    expect(count(markup, 'class="yao-marker-svg"')).toBe(1);
+    expect(markup).not.toContain("yao-marker-svg-visible");
+    expect(markup).not.toContain("yao-svg-marker");
     expect(markup).toContain('class="yao-svg-bar"');
   });
 });
