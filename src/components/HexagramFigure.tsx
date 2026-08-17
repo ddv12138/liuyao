@@ -47,10 +47,7 @@ export function HexagramFigure({
         const infoId = `${infoIdPrefix}-${idx}`;
         const infoOpen = Boolean(spec?.info && openInfoId === infoId);
         return (
-          <div
-            key={i}
-            className={`yao-line yao-appear${showInfo && spec?.info ? " yao-line-has-side" : ""}`}
-          >
+          <div key={i} className="yao-line yao-appear">
             <div className="yao-track">
               <svg
                 className="yao-svg"

@@ -61,7 +61,7 @@ describe("HexagramFigure", () => {
     expect(markup).toContain('class="yao-svg-bar"');
   });
 
-  it("balances only rows that have a side element", () => {
+  it("renders info slots only for annotated rows", () => {
     const markup = renderToStaticMarkup(
       <HexagramFigure
         lines={[
@@ -72,7 +72,7 @@ describe("HexagramFigure", () => {
       />,
     );
 
-    expect(count(markup, "yao-line-has-side")).toBe(1);
     expect(count(markup, "yao-info-slot")).toBe(1);
+    expect(count(markup, "yao-info-trigger")).toBe(1);
   });
 });

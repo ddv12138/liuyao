@@ -157,8 +157,7 @@ body {
   white-space: nowrap;
 }
 
-.hexagram-with-labels .yao-line::before,
-.hexagram-with-info .yao-line-has-side::before {
+.hexagram-with-labels .yao-line::before {
   content: "";
   flex: none;
   width: var(--yao-side-width, 0rem);
@@ -181,16 +180,12 @@ body {
 }
 
 .yao-info-slot {
-  position: relative;
-  flex: none;
+  position: absolute;
+  left: calc(100% + 0.35rem);
+  top: 50%;
+  transform: translateY(-50%);
   width: 1.25rem;
   height: 1.25rem;
-  margin-left: 0.35rem;
-}
-
-.hexagram-with-info {
-  --yao-side-width: 1.25rem;
-  --yao-side-gap: 0.35rem;
 }
 
 .hexagram-with-info .yao-info-trigger {
