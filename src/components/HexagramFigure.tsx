@@ -78,7 +78,7 @@ export function HexagramFigure({
               </svg>
             </div>
             {showInfo && spec?.info && (
-              <>
+              <span className="yao-info-slot">
                 <button
                   type="button"
                   className="yao-info-trigger"
@@ -101,7 +101,7 @@ export function HexagramFigure({
                     <p>{spec.info.text}</p>
                   </div>
                 )}
-              </>
+              </span>
             )}
             {showLabels && (
               <span

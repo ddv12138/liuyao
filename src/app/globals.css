@@ -130,9 +130,11 @@ body {
   display: flex;
   flex-direction: column;
   gap: var(--yao-row-gap);
-  --yao-line-width: 4.2rem;
+  --yao-line-width: 3.8rem;
   --yao-row-height: 0.36rem;
-  --yao-row-gap: 0.05rem;
+  --yao-row-gap: 0.08rem;
+  --yao-label-width: 6.5rem;
+  --yao-label-gap: 0.5rem;
   --yao-color: var(--ink);
   --yao-moving-color: var(--accent);
 }
@@ -155,21 +157,45 @@ body {
   white-space: nowrap;
 }
 
-.hexagram-with-labels .yao-label {
-  position: absolute;
-  left: calc(100% + 0.75rem);
-  width: 10.5rem;
-  min-width: 10.5rem;
-  margin-right: 0;
-  text-align: left;
+.hexagram-with-labels .yao-line::before,
+.hexagram-with-info .yao-line::before {
+  content: "";
+  flex: none;
+  width: var(--yao-side-width, 0rem);
+  margin-right: var(--yao-side-gap, 0rem);
 }
-.hexagram-with-info .yao-info-trigger {
-  position: absolute;
-  left: calc(100% + 0.35rem);
-  top: 50%;
-  z-index: 2;
+
+.hexagram-with-labels .yao-label {
+  width: var(--yao-label-width, 10.5rem);
+  min-width: 0;
+  margin-left: var(--yao-label-gap, 0.75rem);
+  text-align: left;
+  font-size: 0.62rem;
+  line-height: 1.3;
+  white-space: normal;
+}
+
+.hexagram-with-labels {
+  --yao-side-width: var(--yao-label-width, 10.5rem);
+  --yao-side-gap: var(--yao-label-gap, 0.75rem);
+}
+
+.yao-info-slot {
+  position: relative;
+  flex: none;
   width: 1.25rem;
   height: 1.25rem;
+  margin-left: 0.35rem;
+}
+
+.hexagram-with-info {
+  --yao-side-width: 1.25rem;
+  --yao-side-gap: 0.35rem;
+}
+
+.hexagram-with-info .yao-info-trigger {
+  width: 100%;
+  height: 100%;
   padding: 0;
   border: 0;
   border-radius: 999px;
@@ -177,7 +203,6 @@ body {
   background: transparent;
   font-size: 0.9rem;
   line-height: 1;
-  transform: translateY(-50%);
   cursor: pointer;
 }
 
@@ -226,11 +251,8 @@ body {
 
 
 .hexagram-compact.hexagram-with-labels .yao-label {
-  left: calc(100% + 0.45rem);
   width: 5.25rem;
-  min-width: 5.25rem;
-  margin-right: 0;
-  font-size: 0.62rem;
+  font-size: 0.6rem;
 }
 
 .hexagram-with-labels .yao-label-primary {
@@ -248,11 +270,9 @@ body {
 }
 
 @media (max-width: 420px) {
-  .hexagram-normal.hexagram-with-labels .yao-label {
-    width: 9.25rem;
-    min-width: 9.25rem;
-    margin-right: 0;
-    font-size: 0.62rem;
+  .hexagram-normal {
+    --yao-line-width: min(3.8rem, 30vw);
+    --yao-label-width: 6rem;
   }
 }
 
@@ -284,6 +304,13 @@ body {
   stroke-width: 1;
 }
 
+.hexagram-cast {
+  --yao-line-width: 3.2rem;
+  --yao-row-gap: 0.14rem;
+  --yao-label-width: 5rem;
+  --yao-label-gap: 0.45rem;
+}
+
 .hexagram-cast .yao-svg-placeholder {
   stroke: var(--ink-soft);
   stroke-dasharray: 4 3;
@@ -303,12 +330,6 @@ body {
   --yao-line-width: 3.5rem;
   --yao-row-height: 0.3rem;
   --yao-row-gap: 0.04rem;
-}
-
-@media (max-width: 420px) {
-  .hexagram-normal {
-    --yao-line-width: min(4.2rem, 30vw);
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
