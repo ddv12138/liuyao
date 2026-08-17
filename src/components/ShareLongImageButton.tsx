@@ -44,6 +44,8 @@ export function ShareLongImageButton({
         cacheBust: true,
         pixelRatio: 2,
         backgroundColor: "#f7f3ea",
+        // 分享节点平时移到屏幕外；html-to-image 会复制这个位置，需将克隆节点移回画布内。
+        style: { position: "absolute", inset: "auto", left: "0px", top: "0px" },
       });
       const file = await dataUrlToFile(dataUrl, `六爻-${result.original.name}.png`);
       const canShareFiles =
