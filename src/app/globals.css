@@ -129,6 +129,7 @@ body {
 .hexagram-figure {
   display: flex;
   flex-direction: column;
+  width: fit-content;
   gap: var(--yao-row-gap);
   --yao-line-width: 3.8rem;
   --yao-row-height: 0.36rem;
